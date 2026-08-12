@@ -253,13 +253,13 @@
     <!-- HUD -->
     <div class="hud">
       <div class="barwrap p1">
-        <div class="name"><span>DUKE // P1</span><span class="rounds" id="p1rounds"></span></div>
+        <div class="name"><span id="p1hudname">DUKE // P1</span><span class="rounds" id="p1rounds"></span></div>
         <div class="healthbar"><div class="ghost" id="p1ghost"></div><div class="fill" id="p1fill"></div></div>
         <div class="special-meter"><div class="special-fill" id="p1sp"></div></div>
       </div>
       <div class="clock"><div class="t" id="clock">60</div><div class="r" id="roundlabel">ROUND 1</div><div class="arena" id="arenaName"></div></div>
       <div class="barwrap p2">
-        <div class="name"><span>RAVEN // P2</span><span class="rounds" id="p2rounds"></span></div>
+        <div class="name"><span id="p2hudname">RAVEN // P2</span><span class="rounds" id="p2rounds"></span></div>
         <div class="healthbar"><div class="ghost" id="p2ghost"></div><div class="fill" id="p2fill"></div></div>
         <div class="special-meter"><div class="special-fill" id="p2sp"></div></div>
       </div>
@@ -291,17 +291,18 @@
       <div class="vs-row">
         <div class="vs-card p1c">
           <div class="vs-portrait-wrap"><div class="portrait-sprite" id="p1portrait"></div></div>
-          <h3>DUKE</h3>
+          <h3 id="p1CardName">DUKE</h3>
           <p>PUNCH · KICK<br>DASH STRIKE (SPACE)</p>
         </div>
         <div class="vs-x">VS</div>
         <div class="vs-card p2c">
           <div class="vs-portrait-wrap"><div class="portrait-sprite" id="p2portrait"></div></div>
-          <h3>RAVEN</h3>
+          <h3 id="p2CardName">RAVEN</h3>
           <p>PUNCH · KICK<br>DASH STRIKE (ENTER)</p>
         </div>
       </div>
       <button class="btn" id="startBtn">FIGHT — BEST OF 3</button>
+      <a href="character-select.html" style="color:#8a7cae;font-size:11px;letter-spacing:2px;text-decoration:none;">&#8617; CHANGE FIGHTERS</a>
       <div class="controls-hint">
         <span><b>P1</b> — A/D move · W jump · S block · SPACE attack</span>
         <span><b>P2</b> — ←/→ move · ↑ jump · ↓ block · ENTER attack</span>
@@ -359,11 +360,57 @@
       attack3: {src:'../assets/sprites/Fighter/Attack_3.png', frames:4},
       hurt:    {src:'../assets/sprites/Fighter/Hurt.png',     frames:3},
       dead:    {src:'../assets/sprites/Fighter/Dead.png',     frames:3},
+    },
+    knight1: {
+      idle:    {src:'../assets/sprites/Knight1/Idle.png',     frames:4},
+      walk:    {src:'../assets/sprites/Knight1/Walk.png',     frames:8},
+      jump:    {src:'../assets/sprites/Knight1/Jump.png',     frames:6},
+      shield:  {src:'../assets/sprites/Knight1/Shield.png',   frames:5},
+      attack1: {src:'../assets/sprites/Knight1/Attack_1.png', frames:5},
+      attack2: {src:'../assets/sprites/Knight1/Attack_2.png', frames:4},
+      attack3: {src:'../assets/sprites/Knight1/Attack_3.png', frames:4},
+      hurt:    {src:'../assets/sprites/Knight1/Hurt.png',     frames:2},
+      dead:    {src:'../assets/sprites/Knight1/Dead.png',     frames:6},
+    },
+    knight2: {
+      idle:    {src:'../assets/sprites/Knight2/Idle.png',     frames:4},
+      walk:    {src:'../assets/sprites/Knight2/Walk.png',     frames:8},
+      jump:    {src:'../assets/sprites/Knight2/Jump.png',     frames:6},
+      shield:  {src:'../assets/sprites/Knight2/Shield.png',   frames:5},
+      attack1: {src:'../assets/sprites/Knight2/Attack_1.png', frames:5},
+      attack2: {src:'../assets/sprites/Knight2/Attack_2.png', frames:4},
+      attack3: {src:'../assets/sprites/Knight2/Attack_3.png', frames:4},
+      hurt:    {src:'../assets/sprites/Knight2/Hurt.png',     frames:2},
+      dead:    {src:'../assets/sprites/Knight2/Dead.png',     frames:6},
+    },
+    knight3: {
+      idle:    {src:'../assets/sprites/Knight3/Idle.png',     frames:4},
+      walk:    {src:'../assets/sprites/Knight3/Walk.png',     frames:8},
+      jump:    {src:'../assets/sprites/Knight3/Jump.png',     frames:6},
+      shield:  {src:'../assets/sprites/Knight3/Shield.png',   frames:5},
+      attack1: {src:'../assets/sprites/Knight3/Attack_1.png', frames:5},
+      attack2: {src:'../assets/sprites/Knight3/Attack_2.png', frames:4},
+      attack3: {src:'../assets/sprites/Knight3/Attack_3.png', frames:4},
+      hurt:    {src:'../assets/sprites/Knight3/Hurt.png',     frames:2},
+      dead:    {src:'../assets/sprites/Knight3/Dead.png',     frames:6},
     }
   };
-  // which character each player uses — swap these to try Fighter instead
-  const P1_CHAR = 'shinobi';
-  const P2_CHAR = 'samurai';
+  // display labels shown on the HUD / VS screen for each roster character
+  const CHAR_META = {
+    shinobi: {label:'SHINOBI'},
+    samurai: {label:'SAMURAI'},
+    fighter: {label:'BRAWLER'},
+    knight1: {label:'KNIGHT I'},
+    knight2: {label:'KNIGHT II'},
+    knight3: {label:'KNIGHT III'}
+  };
+
+  // character choice comes from character-select.html via URL params
+  // (?p1=shinobi&p2=samurai) — falls back to defaults if missing/invalid,
+  // so this file still works fine if opened directly.
+  const urlParams = new URLSearchParams(location.search);
+  const P1_CHAR = CHAR_SHEETS[urlParams.get('p1')] ? urlParams.get('p1') : 'shinobi';
+  const P2_CHAR = CHAR_SHEETS[urlParams.get('p2')] ? urlParams.get('p2') : 'samurai';
 
   const STATE_TO_ANIM = {
     idle:'idle', walk:'walk', jump:'jump', block:'shield',
@@ -438,12 +485,16 @@
     };
   }
 
-  let p1 = makeFighter('f1','p1',P1_CHAR,'DUKE','#2fd8ff', 210);
-  let p2 = makeFighter('f2','p2',P2_CHAR,'RAVEN','#c34bff', 690);
+  let p1 = makeFighter('f1','p1',P1_CHAR,CHAR_META[P1_CHAR].label,'#2fd8ff', 210);
+  let p2 = makeFighter('f2','p2',P2_CHAR,CHAR_META[P2_CHAR].label,'#c34bff', 690);
   updateSprite(p1, 0);
   updateSprite(p2, 0);
   paintFrame(document.getElementById('p1portrait'), CHAR_SHEETS[P1_CHAR].idle, 0, 210);
   paintFrame(document.getElementById('p2portrait'), CHAR_SHEETS[P2_CHAR].idle, 0, 210);
+  document.getElementById('p1CardName').textContent = CHAR_META[P1_CHAR].label;
+  document.getElementById('p2CardName').textContent = CHAR_META[P2_CHAR].label;
+  document.getElementById('p1hudname').textContent = CHAR_META[P1_CHAR].label+' // P1';
+  document.getElementById('p2hudname').textContent = CHAR_META[P2_CHAR].label+' // P2';
 
   // ---------- round backgrounds (palette shift per round; swap in real
   // background images later by replacing .haze/.skyline/.grid-floor with
@@ -823,4 +874,4 @@
 })();
 </script>
 </body>
-</html>t
+</html>
