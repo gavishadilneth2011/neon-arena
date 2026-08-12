@@ -88,16 +88,20 @@
   .special-fill.ready{animation:spReady 1s ease-in-out infinite;}
   @keyframes spReady{0%,100%{filter:brightness(1)}50%{filter:brightness(1.8)}}
 
-  .clock{flex:none;width:74px;text-align:center;padding-top:2px;}
+  .clock{flex:none;width:84px;text-align:center;padding-top:2px;}
   .clock .t{font-size:30px;color:var(--gold);text-shadow:0 0 10px var(--gold);font-variant-numeric:tabular-nums;line-height:1;}
   .clock .r{font-size:10px;letter-spacing:3px;color:#9d8bc4;margin-top:2px;}
+  .clock .arena{font-size:8px;letter-spacing:1.5px;color:#6a5a94;margin-top:3px;text-transform:uppercase;}
+
+  /* ---------- background layer (swapped per round) ---------- */
+  .bgfx{position:absolute;inset:0;transition:filter .6s ease;}
 
   /* ---------- title logo ---------- */
   .logo{position:absolute;top:2px;left:50%;transform:translateX(-50%);z-index:5;
     font-size:11px;letter-spacing:6px;color:#4a3a72;pointer-events:none;}
 
   /* ---------- fighters ---------- */
-  .fighter{position:absolute;bottom:118px;width:10px;height:250px;transform-origin:50% 100%;}
+  .fighter{position:absolute;bottom:118px;width:10px;height:256px;transform-origin:50% 100%;}
   .shadow{position:absolute;bottom:-6px;left:50%;width:74px;height:16px;transform:translateX(-50%);
     background:radial-gradient(ellipse at center, rgba(0,0,0,.55), transparent 70%);
     filter:blur(1px);z-index:1;}
@@ -105,7 +109,7 @@
   .spritebox{position:absolute;left:50%;bottom:0;transform:translateX(-50%);
     width:200px;height:250px;pointer-events:none;}
   .sprite{position:absolute;left:50%;bottom:0;transform:translateX(-50%);
-    height:250px;width:auto;image-rendering:-webkit-optimize-contrast;
+    width:256px;height:256px;background-repeat:no-repeat;image-rendering:pixelated;
     filter:drop-shadow(0 6px 6px rgba(0,0,0,.5));transition:filter .15s;}
   .p1-char .sprite{filter:drop-shadow(0 6px 6px rgba(0,0,0,.5)) drop-shadow(0 0 10px rgba(47,216,255,.0));}
   .p2-char .sprite{filter:drop-shadow(0 6px 6px rgba(0,0,0,.5)) drop-shadow(0 0 10px rgba(195,75,255,.0));}
@@ -188,9 +192,10 @@
     border:2px solid;}
   .p1c .vs-portrait-wrap{border-color:var(--p1);box-shadow:0 0 26px rgba(47,216,255,.45), inset 0 -20px 30px rgba(47,216,255,.15);}
   .p2c .vs-portrait-wrap{border-color:var(--p2);box-shadow:0 0 26px rgba(195,75,255,.45), inset 0 -20px 30px rgba(195,75,255,.15);}
-  .vs-portrait-wrap img{position:absolute;left:50%;bottom:-6px;height:230px;width:auto;transform:translateX(-50%);}
-  .p1c .vs-portrait-wrap img{animation:slideInL .6s ease-out;}
-  .p2c .vs-portrait-wrap img{animation:slideInR .6s ease-out;transform:translateX(-50%) scaleX(-1);}
+  .portrait-sprite{position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);
+    background-repeat:no-repeat;image-rendering:pixelated;}
+  .p1c .portrait-sprite{animation:slideInL .6s ease-out;}
+  .p2c .portrait-sprite{animation:slideInR .6s ease-out;transform:translateX(-50%) scaleX(-1);}
   @keyframes slideInL{0%{transform:translateX(-140%);opacity:0}100%{transform:translateX(-50%);opacity:1}}
   @keyframes slideInR{0%{transform:translateX(40%) scaleX(-1);opacity:0}100%{transform:translateX(-50%) scaleX(-1);opacity:1}}
   .vs-card h3{margin:0;font-size:17px;letter-spacing:3px;font-weight:900;}
@@ -238,9 +243,11 @@
 <body>
 <div id="root">
   <div id="stage">
-    <div class="haze"></div>
-    <div class="skyline" id="skyline"></div>
-    <div class="grid-floor"></div>
+    <div class="bgfx" id="bgfx">
+      <div class="haze"></div>
+      <div class="skyline" id="skyline"></div>
+      <div class="grid-floor"></div>
+    </div>
     <div class="logo">N E O N &nbsp; A R E N A &nbsp;/ /&nbsp; F I G H T E R S</div>
 
     <!-- HUD -->
@@ -250,7 +257,7 @@
         <div class="healthbar"><div class="ghost" id="p1ghost"></div><div class="fill" id="p1fill"></div></div>
         <div class="special-meter"><div class="special-fill" id="p1sp"></div></div>
       </div>
-      <div class="clock"><div class="t" id="clock">60</div><div class="r" id="roundlabel">ROUND 1</div></div>
+      <div class="clock"><div class="t" id="clock">60</div><div class="r" id="roundlabel">ROUND 1</div><div class="arena" id="arenaName"></div></div>
       <div class="barwrap p2">
         <div class="name"><span>RAVEN // P2</span><span class="rounds" id="p2rounds"></span></div>
         <div class="healthbar"><div class="ghost" id="p2ghost"></div><div class="fill" id="p2fill"></div></div>
@@ -264,12 +271,12 @@
     <!-- Fighters -->
     <div class="fighter idle p1-char" id="f1">
       <div class="shadow"></div>
-      <img class="sprite" id="f1sprite" src="" alt="">
+      <div class="sprite" id="f1sprite"></div>
     </div>
 
     <div class="fighter flipped idle p2-char" id="f2">
       <div class="shadow"></div>
-      <img class="sprite" id="f2sprite" src="" alt="">
+      <div class="sprite" id="f2sprite"></div>
     </div>
 
     <div class="round-banner hidden" id="banner"><div class="big" id="bannerText">ROUND 1</div></div>
@@ -283,21 +290,21 @@
       <h1 class="title-main">NEON ARENA</h1>
       <div class="vs-row">
         <div class="vs-card p1c">
-          <div class="vs-portrait-wrap"><img src="../assets/p1_fight/f00.png" alt="Duke"></div>
+          <div class="vs-portrait-wrap"><div class="portrait-sprite" id="p1portrait"></div></div>
           <h3>DUKE</h3>
-          <p>PUNCH · KICK<br>DASH STRIKE (SPACE)</p>
+          <p>PUNCH · KICK<br>DASH STRIKE (ENTER)</p>
         </div>
         <div class="vs-x">VS</div>
         <div class="vs-card p2c">
-          <div class="vs-portrait-wrap"><img src="../assets/p2_walk/f00.png" alt="Raven"></div>
+          <div class="vs-portrait-wrap"><div class="portrait-sprite" id="p2portrait"></div></div>
           <h3>RAVEN</h3>
-          <p>PUNCH · KICK<br>DASH STRIKE (ENTER)</p>
+          <p>PUNCH · KICK<br>DASH STRIKE (SPACE)</p>
         </div>
       </div>
       <button class="btn" id="startBtn">FIGHT — BEST OF 3</button>
       <div class="controls-hint">
-        <span><b>P1</b> — A/D move · W jump · S block · SPACE attack</span>
-        <span><b>P2</b> — ←/→ move · ↑ jump · ↓ block · ENTER attack</span>
+        <span><b>P1</b> — ←/→ move · ↑ jump · ↓ block · ENTER attack</span>
+        <span><b>P2</b> — A/D move · W jump · S block · SPACE attack</span>
       </div>
     </div>
 
@@ -316,41 +323,63 @@
 (function(){
   "use strict";
 
-  // ---------- animated sprite assets ----------
-  // Real multi-frame walk cycles pulled from the uploaded animation packs.
-  function frameSeq(folder, count){
-    const arr = [];
-    for(let i=0;i<count;i++) arr.push('../assets/'+folder+'/f'+String(i).padStart(2,'0')+'.png');
-    return arr;
-  }
-  const P1_WALK = frameSeq('p1_walk', 31);
-  const P2_WALK = frameSeq('p2_walk', 30);
-
-  const SPRITE_MAP = {
-    p1: {
-      idle:   '../assets/p1_fight/f00.png',
-      jump:   '../assets/p1_fight/f00.png',
-      block:  '../assets/p1_fight/f00.png',
-      punch:  '../assets/p1_fight/f02.png',
-      kick:   '../assets/p1_fight/f04.png',
-      special:'../assets/p1_fight/f12.png',
-      hit:    '../assets/p1_fight/f00.png',
-      ko:     '../assets/p1_walk/f00.png',
-      walk:   P1_WALK
+  // ---------- animated sprite assets (real sprite-sheet frames) ----------
+  // Each entry is one horizontal strip PNG, all frames 128x128, cropped via
+  // background-position stepping — no separate frame files needed.
+  const CHAR_SHEETS = {
+    shinobi: {
+      idle:    {src:'../assets/sprites/Shinobi/Idle.png',     frames:6},
+      walk:    {src:'../assets/sprites/Shinobi/Walk.png',     frames:8},
+      jump:    {src:'../assets/sprites/Shinobi/Jump.png',     frames:12},
+      shield:  {src:'../assets/sprites/Shinobi/Shield.png',   frames:4},
+      attack1: {src:'../assets/sprites/Shinobi/Attack_1.png', frames:5},
+      attack2: {src:'../assets/sprites/Shinobi/Attack_2.png', frames:3},
+      attack3: {src:'../assets/sprites/Shinobi/Attack_3.png', frames:4},
+      hurt:    {src:'../assets/sprites/Shinobi/Hurt.png',     frames:2},
+      dead:    {src:'../assets/sprites/Shinobi/Dead.png',     frames:4},
     },
-    p2: {
-      idle:   '../assets/p2_walk/f00.png',
-      jump:   '../assets/p2_walk/f00.png',
-      block:  '../assets/p2_walk/f00.png',
-      punch:  '../assets/p2_walk/f08.png',
-      kick:   '../assets/p2_walk/f16.png',
-      special:'../assets/p2_walk/f22.png',
-      hit:    '../assets/p2_walk/f00.png',
-      ko:     '../assets/p2_walk/f00.png',
-      walk:   P2_WALK
+    samurai: {
+      idle:    {src:'../assets/sprites/Samurai/Idle.png',     frames:6},
+      walk:    {src:'../assets/sprites/Samurai/Walk.png',     frames:8},
+      jump:    {src:'../assets/sprites/Samurai/Jump.png',     frames:12},
+      shield:  {src:'../assets/sprites/Samurai/Shield.png',   frames:2},
+      attack1: {src:'../assets/sprites/Samurai/Attack_1.png', frames:6},
+      attack2: {src:'../assets/sprites/Samurai/Attack_2.png', frames:4},
+      attack3: {src:'../assets/sprites/Samurai/Attack_3.png', frames:3},
+      hurt:    {src:'../assets/sprites/Samurai/Hurt.png',     frames:2},
+      dead:    {src:'../assets/sprites/Samurai/Dead.png',     frames:3},
+    },
+    fighter: {
+      idle:    {src:'../assets/sprites/Fighter/Idle.png',     frames:6},
+      walk:    {src:'../assets/sprites/Fighter/Walk.png',     frames:8},
+      jump:    {src:'../assets/sprites/Fighter/Jump.png',     frames:10},
+      shield:  {src:'../assets/sprites/Fighter/Shield.png',   frames:2},
+      attack1: {src:'../assets/sprites/Fighter/Attack_1.png', frames:4},
+      attack2: {src:'../assets/sprites/Fighter/Attack_2.png', frames:3},
+      attack3: {src:'../assets/sprites/Fighter/Attack_3.png', frames:4},
+      hurt:    {src:'../assets/sprites/Fighter/Hurt.png',     frames:3},
+      dead:    {src:'../assets/sprites/Fighter/Dead.png',     frames:3},
     }
   };
-  const PORTRAITS = { p1:'../assets/p1_fight/f00.png', p2:'../assets/p2_walk/f00.png' };
+  // which character each player uses — swap these to try Fighter instead
+  const P1_CHAR = 'shinobi';
+  const P2_CHAR = 'samurai';
+
+  const STATE_TO_ANIM = {
+    idle:'idle', walk:'walk', jump:'jump', block:'shield',
+    punch:'attack1', kick:'attack2', special:'attack3', hit:'hurt', ko:'dead'
+  };
+  const LOOP_STATES = new Set(['idle','walk','block','jump']);
+  const ANIM_FRAME_MS = 80;
+  const SPRITE_DISP = 256; // on-screen size of one frame for the in-fight sprites
+
+  function paintFrame(el, sheet, frameIdx, dispSize){
+    el.style.backgroundImage = "url('"+sheet.src+"')";
+    el.style.backgroundPosition = (-frameIdx*dispSize)+'px 0px';
+    el.style.backgroundSize = (sheet.frames*dispSize)+'px '+dispSize+'px';
+    el.style.width = dispSize+'px';
+    el.style.height = dispSize+'px';
+  }
 
   // ---------- build a neon skyline once ----------
   const sky = document.getElementById('skyline');
@@ -377,7 +406,6 @@
   const PUNCH_RANGE = 82, KICK_RANGE = 78, SPECIAL_RANGE = 138;
   const PUNCH_DMG = 6, KICK_DMG = 8, SPECIAL_DMG = 16;
   const ROUND_TIME = 60, SPECIAL_COOLDOWN = 3200;
-  const WALK_FRAME_MS = 42; // how fast the walk-cycle frames advance
 
   const stageEl = document.getElementById('stage');
   const clockEl = document.getElementById('clock');
@@ -390,9 +418,9 @@
   const p1comboEl = document.getElementById('p1combo');
   const p2comboEl = document.getElementById('p2combo');
 
-  function makeFighter(id, key, name, color, spawnX){
+  function makeFighter(id, key, charKey, name, color, spawnX){
     return {
-      id, key, name, color,
+      id, key, charKey, name, color,
       el: document.getElementById(id),
       spriteEl: document.getElementById(id+'sprite'),
       x: spawnX, y: 0, vy: 0,
@@ -405,20 +433,38 @@
       specialReady: true, specialCd: 0,
       wins: 0,
       grounded: true,
-      walkFrame: 0, walkTimer: 0,
+      animFrame: 0, animTimer: 0, animElapsed: 0,
       combo: 0, comboTimer: 0,
     };
   }
 
-  let p1 = makeFighter('f1','p1','DUKE','#2fd8ff', 210);
-  let p2 = makeFighter('f2','p2','RAVEN','#c34bff', 690);
-  p1.spriteEl.src = SPRITE_MAP.p1.idle;
-  p2.spriteEl.src = SPRITE_MAP.p2.idle;
+  let p1 = makeFighter('f1','p1',P1_CHAR,'DUKE','#2fd8ff', 210);
+  let p2 = makeFighter('f2','p2',P2_CHAR,'RAVEN','#c34bff', 690);
+  updateSprite(p1, 0);
+  updateSprite(p2, 0);
+  paintFrame(document.getElementById('p1portrait'), CHAR_SHEETS[P1_CHAR].idle, 0, 210);
+  paintFrame(document.getElementById('p2portrait'), CHAR_SHEETS[P2_CHAR].idle, 0, 210);
+
+  // ---------- round backgrounds (palette shift per round; swap in real
+  // background images later by replacing .haze/.skyline/.grid-floor with
+  // your own art and dropping this filter) ----------
+  const ROUND_THEMES = [
+    { name:'NEON DISTRICT',  hue:0,    sat:1    },
+    { name:'INFERNO DOCKS',  hue:-65,  sat:1.15 },
+    { name:'JADE QUARTER',   hue:140,  sat:0.9  },
+  ];
+  const bgfxEl = document.getElementById('bgfx');
+  const arenaNameEl = document.getElementById('arenaName');
+  function applyRoundTheme(n){
+    const t = ROUND_THEMES[(n-1)%ROUND_THEMES.length];
+    bgfxEl.style.filter = 'hue-rotate('+t.hue+'deg) saturate('+t.sat+')';
+    arenaNameEl.textContent = t.name;
+  }
 
   const keys = new Set();
   const justPressed = new Set();
   window.addEventListener('keydown', e=>{
-    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Enter'].includes(e.key)) e.preventDefault();
     if(!keys.has(e.code)) justPressed.add(e.code);
     keys.add(e.code);
   });
@@ -449,6 +495,7 @@
   function beginRound(){
     resetRoundPositions();
     roundLabelEl.textContent = 'ROUND '+roundNum;
+    applyRoundTheme(roundNum);
     showBanner('ROUND '+roundNum, 900, ()=>{ roundActive = true; });
   }
 
@@ -587,20 +634,28 @@
   }
 
   function updateSprite(f, dt){
-    if(f.state === 'walk'){
-      const frames = SPRITE_MAP[f.key].walk;
-      f.walkTimer += dt;
-      if(f.walkTimer >= WALK_FRAME_MS){
-        f.walkTimer = 0;
-        f.walkFrame = (f.walkFrame+1) % frames.length;
-      }
-      f.spriteEl.src = frames[f.walkFrame];
+    const animKey = STATE_TO_ANIM[f.state] || 'idle';
+    const sheet = CHAR_SHEETS[f.charKey][animKey];
+
+    if(f.state !== f.lastState){
       f.lastState = f.state;
-    } else if(f.state !== f.lastState){
-      f.spriteEl.src = SPRITE_MAP[f.key][f.state] || SPRITE_MAP[f.key].idle;
-      f.lastState = f.state;
-      f.walkFrame = 0; f.walkTimer = 0;
+      f.animFrame = 0; f.animTimer = 0; f.animElapsed = 0;
+    } else {
+      f.animElapsed += dt;
     }
+
+    if(LOOP_STATES.has(f.state)){
+      f.animTimer += dt;
+      if(f.animTimer >= ANIM_FRAME_MS){
+        f.animTimer -= ANIM_FRAME_MS;
+        f.animFrame = (f.animFrame+1) % sheet.frames;
+      }
+    } else {
+      // one-shot animation (attacks, hurt, death) — play through once, hold last frame
+      f.animFrame = Math.min(sheet.frames-1, Math.floor(f.animElapsed / ANIM_FRAME_MS));
+    }
+
+    paintFrame(f.spriteEl, sheet, f.animFrame, SPRITE_DISP);
   }
 
   function updateFighter(f, opp, dt, isP1){
@@ -618,11 +673,11 @@
     }
 
     const locked = ['punch','kick','special','hit','ko'].includes(f.state) && f.stateTimer>0;
-    const left = isP1 ? keys.has('KeyA') : keys.has('ArrowLeft');
-    const right = isP1 ? keys.has('KeyD') : keys.has('ArrowRight');
-    const up = isP1 ? keys.has('KeyW') : keys.has('ArrowUp');
-    const down = isP1 ? keys.has('KeyS') : keys.has('ArrowDown');
-    const atkCode = isP1 ? 'Space' : 'Enter';
+    const left = isP1 ? keys.has('ArrowLeft') : keys.has('KeyA');
+    const right = isP1 ? keys.has('ArrowRight') : keys.has('KeyD');
+    const up = isP1 ? keys.has('ArrowUp') : keys.has('KeyW');
+    const down = isP1 ? keys.has('ArrowDown') : keys.has('KeyS');
+    const atkCode = isP1 ? 'Enter' : 'Space';
     const atkJustPressed = justPressed.has(atkCode);
 
     if(f.state==='ko' || !roundActive){
@@ -651,8 +706,8 @@
       f.vy += GRAVITY*(dt/16.67);
       f.y += f.vy*(dt/16.67);
       if(f.y>=0){ f.y=0; f.vy=0; f.grounded=true; if(f.state==='jump') setState(f,'idle',0); }
-      const left2 = isP1?keys.has('KeyA'):keys.has('ArrowLeft');
-      const right2 = isP1?keys.has('KeyD'):keys.has('ArrowRight');
+      const left2 = isP1?keys.has('ArrowLeft'):keys.has('KeyA');
+      const right2 = isP1?keys.has('ArrowRight'):keys.has('KeyD');
       if(left2){ f.x-=MOVE_SPEED*0.7*(dt/16.67); }
       if(right2){ f.x+=MOVE_SPEED*0.7*(dt/16.67); }
       f.x = Math.max(WALL_L, Math.min(WALL_R, f.x));
@@ -698,7 +753,11 @@
     document.getElementById('endSub').textContent = winner.wins+' — '+ (winner===p1?p2.wins:p1.wins) + ' · MATCH OVER';
     document.getElementById('endTitle').textContent = winner.name+' WINS';
     const endPortraits = document.getElementById('endPortraits');
-    endPortraits.innerHTML = '<img src="'+PORTRAITS[winner.key]+'" alt="'+winner.name+'">';
+    const eSheet = CHAR_SHEETS[winner.charKey].idle;
+    endPortraits.innerHTML = '<div class="eportrait" style="width:190px;height:190px;background-repeat:no-repeat;'
+      +'image-rendering:pixelated;filter:drop-shadow(0 0 20px rgba(150,120,255,.4));'
+      +"background-image:url('"+eSheet.src+"');background-position:0px 0px;"
+      +'background-size:'+(eSheet.frames*190)+'px 190px;"></div>';
     endOverlay.classList.remove('hidden');
     running = false;
   }

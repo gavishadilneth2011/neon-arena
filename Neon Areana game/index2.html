@@ -464,7 +464,7 @@
   const keys = new Set();
   const justPressed = new Set();
   window.addEventListener('keydown', e=>{
-    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Enter'].includes(e.key)) e.preventDefault();
     if(!keys.has(e.code)) justPressed.add(e.code);
     keys.add(e.code);
   });
@@ -726,7 +726,11 @@
     // render position + classes
     f.el.style.left = (f.x)+'px';
     f.el.style.transform = 'translateY('+(f.y)+'px)';
-    const flip = f.facing===1;
+    // NOTE: sprite sheets face RIGHT by default, so we only mirror (scaleX(-1))
+    // when the fighter needs to face LEFT (facing === -1). This was previously
+    // inverted, which made both fighters mirror the wrong way once a round
+    // started (i.e. facing away from each other instead of squaring up).
+    const flip = f.facing===-1;
     f.el.className = 'fighter '+f.key+'-char '+f.state+(flip?' flipped':'')+(!f.grounded?' airborne':'');
 
     updateSprite(f, dt);
@@ -819,4 +823,4 @@
 })();
 </script>
 </body>
-</html>
+</html>t
