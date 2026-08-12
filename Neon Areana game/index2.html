@@ -214,6 +214,12 @@
   @keyframes btnPulse{0%,100%{box-shadow:0 0 18px rgba(150,120,255,.35)}50%{box-shadow:0 0 34px rgba(150,120,255,.65)}}
   .btn:hover{transform:translateY(-2px) scale(1.04);}
   .btn:active{transform:translateY(0) scale(.98);}
+  .btn-row{display:flex;gap:14px;align-items:center;}
+  .btn-outline{font-family:inherit;font-weight:800;letter-spacing:2px;font-size:14px;
+    padding:12px 26px;border-radius:8px;cursor:pointer;color:var(--ink);
+    background:transparent;border:2px solid #6a5a94;transition:transform .12s,border-color .2s,color .2s;}
+  .btn-outline:hover{transform:translateY(-2px) scale(1.03);border-color:var(--p1);color:var(--p1);}
+  .btn-outline:active{transform:translateY(0) scale(.98);}
   .controls-hint{display:flex;gap:34px;font-size:11px;color:#8a7cae;letter-spacing:1px;}
   .controls-hint b{color:var(--ink);}
 
@@ -301,8 +307,10 @@
           <p>PUNCH · KICK<br>DASH STRIKE (ENTER)</p>
         </div>
       </div>
-      <button class="btn" id="startBtn">FIGHT — BEST OF 3</button>
-      <a href="character-select.html" style="color:#8a7cae;font-size:11px;letter-spacing:2px;text-decoration:none;">&#8617; CHANGE FIGHTERS</a>
+      <div class="btn-row">
+        <button class="btn" id="startBtn">FIGHT — BEST OF 3</button>
+        <a class="btn-outline" id="selectCharsLink" href="./Character_Select..html" style="text-decoration:none;display:inline-block;">SELECT CHARACTERS</a>
+      </div>
       <div class="controls-hint">
         <span><b>P1</b> — A/D move · W jump · S block · SPACE attack</span>
         <span><b>P2</b> — ←/→ move · ↑ jump · ↓ block · ENTER attack</span>
@@ -495,6 +503,7 @@
   document.getElementById('p2CardName').textContent = CHAR_META[P2_CHAR].label;
   document.getElementById('p1hudname').textContent = CHAR_META[P1_CHAR].label+' // P1';
   document.getElementById('p2hudname').textContent = CHAR_META[P2_CHAR].label+' // P2';
+  document.getElementById('selectCharsLink').href = './Character_Select..html?p1='+P1_CHAR+'&p2='+P2_CHAR;
 
   // ---------- round backgrounds (palette shift per round; swap in real
   // background images later by replacing .haze/.skyline/.grid-floor with
