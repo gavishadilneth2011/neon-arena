@@ -245,6 +245,25 @@
 
   footer.tip{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:10px;
     color:#4a3a72;letter-spacing:1px;z-index:5;}
+
+  /* in-fight controls reminder — full-screen pause overlay shown at round 1 start */
+  .controls-overlay{position:absolute;inset:0;z-index:48;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(6,4,14,0);pointer-events:none;
+    transition:opacity .35s ease,background .35s ease;opacity:0;}
+  .controls-overlay.show{opacity:1;pointer-events:auto;cursor:pointer;
+    background:rgba(6,4,14,.68);backdrop-filter:blur(2px);}
+  .controls-overlay-inner{display:flex;flex-direction:column;align-items:center;gap:12px;
+    padding:28px 44px;border-radius:14px;background:rgba(20,12,38,.55);
+    border:1px solid rgba(255,255,255,.15);box-shadow:0 0 40px rgba(150,80,255,.25);}
+  .co-title{font-size:13px;letter-spacing:7px;color:var(--gold);text-shadow:0 0 10px var(--gold);}
+  .co-row{font-size:14.5px;letter-spacing:.6px;color:#dcd4f0;}
+  .co-row b{color:var(--ink);}
+  .co-row.co-p1 b{color:var(--p1);text-shadow:0 0 6px var(--p1);}
+  .co-row.co-p2 b{color:var(--p2);text-shadow:0 0 6px var(--p2);}
+  .co-hint{font-size:10px;letter-spacing:2.5px;color:#9d8bc4;margin-top:8px;text-transform:uppercase;
+    animation:coPulse 1.6s ease-in-out infinite;}
+  @keyframes coPulse{0%,100%{opacity:.55}50%{opacity:1}}
 </style>
 </head>
 <body>
@@ -287,6 +306,14 @@
     </div>
 
     <div class="round-banner hidden" id="banner"><div class="big" id="bannerText">ROUND 1</div></div>
+    <div class="controls-overlay hidden" id="controlsOverlay">
+      <div class="controls-overlay-inner">
+        <div class="co-title">CONTROLS</div>
+        <div class="co-row co-p1"><b>P1</b> — A/D move · W jump · S block · SPACE attack</div>
+        <div class="co-row co-p2" id="coP2Row"><b>P2</b> — ←/→ move · ↑ jump · ↓ block · ENTER attack</div>
+        <div class="co-hint">click or press any key to begin</div>
+      </div>
+    </div>
     <div class="flash" id="flash"></div>
     <div class="vignette"></div>
     <div class="scanlines"></div>
@@ -485,6 +512,29 @@
   const endOverlay = document.getElementById('endOverlay');
   const p1comboEl = document.getElementById('p1combo');
   const p2comboEl = document.getElementById('p2combo');
+  const controlsOverlayEl = document.getElementById('controlsOverlay');
+  const coP2Row = document.getElementById('coP2Row');
+
+  let controlsOverlayTimer = null;
+  function showControlsOverlay(){
+    coP2Row.innerHTML = p2IsBot
+      ? '<b>P2</b> — CPU controlled ('+BOT_LEVELS[botDifficultyIndex].name+')'
+      : '<b>P2</b> — ←/→ move · ↑ jump · ↓ block · ENTER attack';
+    roundActive = false; // pause the fight while the overlay is up
+    controlsOverlayEl.classList.remove('hidden');
+    void controlsOverlayEl.offsetWidth;
+    controlsOverlayEl.classList.add('show');
+    clearTimeout(controlsOverlayTimer);
+    controlsOverlayTimer = setTimeout(dismissControlsOverlay, 5000);
+  }
+  function dismissControlsOverlay(){
+    if(controlsOverlayEl.classList.contains('hidden')) return;
+    clearTimeout(controlsOverlayTimer);
+    controlsOverlayEl.classList.remove('show');
+    setTimeout(()=>{ controlsOverlayEl.classList.add('hidden'); }, 350);
+    roundActive = true; // resume the fight
+  }
+  controlsOverlayEl.addEventListener('click', dismissControlsOverlay);
 
   function makeFighter(id, key, charKey, name, color, spawnX){
     return {
@@ -567,6 +617,7 @@
     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','Enter'].includes(e.key)) e.preventDefault();
     if(!keys.has(e.code)) justPressed.add(e.code);
     keys.add(e.code);
+    if(controlsOverlayEl.classList.contains('show')) dismissControlsOverlay();
   });
   window.addEventListener('keyup', e=> keys.delete(e.code));
 
@@ -599,7 +650,13 @@
     resetRoundPositions();
     roundLabelEl.textContent = 'ROUND '+roundNum;
     applyRoundTheme(roundNum);
-    showBanner('ROUND '+roundNum, 900, ()=>{ roundActive = true; });
+    showBanner('ROUND '+roundNum, 900, ()=>{
+      if(roundNum===1){
+        showControlsOverlay(); // fight stays paused until the player dismisses it
+      } else {
+        roundActive = true;
+      }
+    });
   }
 
   function showBanner(text, dur, cb, kind){
