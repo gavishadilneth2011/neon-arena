@@ -223,6 +223,11 @@
   .btn-outline.active{border-color:var(--gold);color:var(--gold);box-shadow:0 0 16px rgba(255,210,63,.35);}
   .controls-hint{display:flex;gap:34px;font-size:11px;color:#8a7cae;letter-spacing:1px;}
   .controls-hint b{color:var(--ink);}
+  .hub-back{position:absolute;top:14px;left:14px;font-family:inherit;font-weight:800;
+    letter-spacing:1px;font-size:12px;padding:8px 14px;border-radius:8px;
+    border:1px solid rgba(255,255,255,.25);background:rgba(10,7,20,.55);
+    color:#eaf6ff;cursor:pointer;text-decoration:none;z-index:60;}
+  .hub-back:hover{border-color:var(--p2);color:var(--p2);}
 
   .round-banner{position:absolute;top:44%;left:0;right:0;text-align:center;z-index:45;pointer-events:none;}
   .round-banner .big{font-size:46px;font-weight:900;letter-spacing:4px;color:var(--gold);
@@ -274,6 +279,7 @@
       <div class="skyline" id="skyline"></div>
       <div class="grid-floor"></div>
     </div>
+    <a class="hub-back" href="../NEON DEADZONE/index.html">◀ GAME HUB</a>
     <div class="logo">N E O N &nbsp; A R E N A &nbsp;/ /&nbsp; F I G H T E R S</div>
 
     <!-- HUD -->
@@ -339,7 +345,7 @@
         <button class="btn" id="startBtn">FIGHT — BEST OF 3</button>
         <button class="btn-outline" id="botToggleBtn" type="button">P2: HUMAN</button>
         <button class="btn-outline hidden" id="botDifficultyBtn" type="button">DIFFICULTY: MEDIUM</button>
-        <a class="btn-outline" id="selectCharsLink" href="./Character_Select..html" style="text-decoration:none;display:inline-block;">SELECT CHARACTERS</a>
+        <a class="btn-outline" id="selectCharsLink" href="./Character_Select.html" style="text-decoration:none;display:inline-block;">SELECT CHARACTERS</a>
       </div>
       <div class="controls-hint">
         <span><b>P1</b> — A/D move · W jump · S block · SPACE attack</span>
@@ -352,7 +358,10 @@
       <p class="title-eyebrow" id="endSub">MATCH OVER</p>
       <div class="end-portraits" id="endPortraits"></div>
       <h1 class="title-main" id="endTitle">DUKE WINS</h1>
-      <button class="btn" id="rematchBtn">REMATCH</button>
+      <div class="btn-row">
+        <button class="btn" id="rematchBtn">REMATCH</button>
+        <a class="btn-outline" href="../NEON DEADZONE/index.html" style="text-decoration:none;display:inline-block;">GAME HUB</a>
+      </div>
     </div>
   </div>
 </div>
@@ -567,7 +576,7 @@
   document.getElementById('p2CardName').textContent = CHAR_META[P2_CHAR].label;
   document.getElementById('p1hudname').textContent = CHAR_META[P1_CHAR].label+' // P1';
   document.getElementById('p2hudname').textContent = CHAR_META[P2_CHAR].label+' // P2';
-  document.getElementById('selectCharsLink').href = './Character_Select..html?p1='+P1_CHAR+'&p2='+P2_CHAR;
+  document.getElementById('selectCharsLink').href = './Character_Select.html?p1='+P1_CHAR+'&p2='+P2_CHAR;
 
   const ROUND_THEMES = [
     { name:'NEON DISTRICT',  hue:0,    sat:1    },

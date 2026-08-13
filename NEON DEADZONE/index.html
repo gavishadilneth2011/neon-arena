@@ -283,11 +283,11 @@
         <div class="card-desc">SURVIVE THE HORDE</div>
         <button class="btn" style="border-color:var(--neon-green);color:var(--neon-green);text-shadow:0 0 8px var(--neon-green);">PLAY</button>
       </div>
-      <div class="game-card locked">
-        <div class="card-icon" style="color:#556">🥊</div>
+      <div class="game-card" id="cardFighting">
+        <div class="card-icon" style="color:var(--neon-pink)">🥊</div>
         <div class="card-title">FIGHTING ARENA</div>
         <div class="card-desc">1V1 BATTLE</div>
-        <button class="btn locked-btn">LOCKED</button>
+        <button class="btn" style="border-color:var(--neon-pink);color:var(--neon-pink);text-shadow:0 0 8px var(--neon-pink);">PLAY</button>
       </div>
       <div class="game-card locked">
         <div class="card-icon" style="color:#556">🔒</div>
@@ -423,6 +423,7 @@ document.querySelector('.diff-btn[data-diff="MEDIUM"]').classList.add('selected'
 
 /* ---------- Nav wiring ---------- */
 document.getElementById('cardZombie').addEventListener('click', ()=>showScreen('zombieMenuScreen'));
+document.getElementById('cardFighting').addEventListener('click', ()=>{ location.href = '../Neon Areana game/Character_Select.html'; });
 document.getElementById('btnBackHub1').addEventListener('click', ()=>showScreen('hubScreen'));
 document.getElementById('btnDifficulty').addEventListener('click', ()=>showScreen('difficultyScreen'));
 document.getElementById('btnBackFromDiff').addEventListener('click', ()=>showScreen('zombieMenuScreen'));
