@@ -335,6 +335,14 @@
   // ---------- animated sprite assets (real sprite-sheet frames) ----------
   // Each entry is one horizontal strip PNG, all frames 128x128, cropped via
   // background-position stepping — no separate frame files needed.
+  //
+  // Knight1 / Knight2 / Knight3 have been removed and replaced with the
+  // three vampire characters from the "free-vampire-pixel-art" pack:
+  //   Converted_Vampire -> key "vampire"
+  //   Countess_Vampire  -> key "countess"
+  //   Vampire_Girl      -> key "vampiregirl"
+  // Frame counts below were measured directly off each sheet (sheet width /
+  // 128px frame height), so they match the actual art, not guesses.
   const CHAR_SHEETS = {
     shinobi: {
       idle:    {src:'../assets/sprites/Shinobi/Idle.png',     frames:6},
@@ -369,56 +377,86 @@
       hurt:    {src:'../assets/sprites/Fighter/Hurt.png',     frames:3},
       dead:    {src:'../assets/sprites/Fighter/Dead.png',     frames:3},
     },
-    knight1: {
-      idle:    {src:'../assets/sprites/Knight1/Idle.png',     frames:4},
-      walk:    {src:'../assets/sprites/Knight1/Walk.png',     frames:8},
-      jump:    {src:'../assets/sprites/Knight1/Jump.png',     frames:6},
-      shield:  {src:'../assets/sprites/Knight1/Shield.png',   frames:5},
-      attack1: {src:'../assets/sprites/Knight1/Attack_1.png', frames:5},
-      attack2: {src:'../assets/sprites/Knight1/Attack_2.png', frames:4},
-      attack3: {src:'../assets/sprites/Knight1/Attack_3.png', frames:4},
-      hurt:    {src:'../assets/sprites/Knight1/Hurt.png',     frames:2},
-      dead:    {src:'../assets/sprites/Knight1/Dead.png',     frames:6},
+    vampire: {
+      idle:    {src:'../assets/assets/sprites/Converted_Vampire/Idle.png',     frames:5},
+      walk:    {src:'../assets/assets/sprites/Converted_Vampire/Walk.png',     frames:8},
+      jump:    {src:'../assets/assets/sprites/Converted_Vampire/Jump.png',     frames:7},
+      // this pack calls its block pose "Protect" instead of "Shield" —
+      // same role, just mapped to the shield/block state below.
+      shield:  {src:'../assets/assets/sprites/Converted_Vampire/Protect.png',  frames:2},
+      attack1: {src:'../assets/assets/sprites/Converted_Vampire/Attack_1.png', frames:5},
+      attack2: {src:'../assets/assets/sprites/Converted_Vampire/Attack_2.png', frames:3},
+      attack3: {src:'../assets/assets/sprites/Converted_Vampire/Attack_3.png', frames:4},
+      hurt:    {src:'../assets/assets/sprites/Converted_Vampire/Hurt.png',     frames:1},
+      dead:    {src:'../assets/assets/sprites/Converted_Vampire/Dead.png',     frames:8},
     },
-    knight2: {
-      idle:    {src:'../assets/sprites/Knight2/Idle.png',     frames:4},
-      walk:    {src:'../assets/sprites/Knight2/Walk.png',     frames:8},
-      jump:    {src:'../assets/sprites/Knight2/Jump.png',     frames:6},
-      shield:  {src:'../assets/sprites/Knight2/Shield.png',   frames:5},
-      attack1: {src:'../assets/sprites/Knight2/Attack_1.png', frames:5},
-      attack2: {src:'../assets/sprites/Knight2/Attack_2.png', frames:4},
-      attack3: {src:'../assets/sprites/Knight2/Attack_3.png', frames:4},
-      hurt:    {src:'../assets/sprites/Knight2/Hurt.png',     frames:2},
-      dead:    {src:'../assets/sprites/Knight2/Dead.png',     frames:6},
+    countess: {
+      idle:    {src:'../assets/assets/sprites/Countess_Vampire/Idle.png',     frames:5},
+      walk:    {src:'../assets/assets/sprites/Countess_Vampire/Walk.png',     frames:6},
+      jump:    {src:'../assets/assets/sprites/Countess_Vampire/Jump.png',     frames:6},
+      // Countess has no dedicated block/shield sheet in this pack, so
+      // block reuses her Idle animation (still readable as "holding still").
+      shield:  {src:'../assets/assets/sprites/Countess_Vampire/Idle.png',     frames:5},
+      attack1: {src:'../assets/assets/sprites/Countess_Vampire/Attack_1.png', frames:6},
+      attack2: {src:'../assets/assets/sprites/Countess_Vampire/Attack_2.png', frames:3},
+      // Attack_3 in this pack is a single 1-frame pose, so the flashier
+      // 6-frame Attack_4 is used for her special instead.
+      attack3: {src:'../assets/assets/sprites/Countess_Vampire/Attack_4.png', frames:6},
+      hurt:    {src:'../assets/assets/sprites/Countess_Vampire/Hurt.png',     frames:2},
+      dead:    {src:'../assets/assets/sprites/Countess_Vampire/Dead.png',     frames:8},
     },
-    knight3: {
-      idle:    {src:'../assets/sprites/Knight3/Idle.png',     frames:4},
-      walk:    {src:'../assets/sprites/Knight3/Walk.png',     frames:8},
-      jump:    {src:'../assets/sprites/Knight3/Jump.png',     frames:6},
-      shield:  {src:'../assets/sprites/Knight3/Shield.png',   frames:5},
-      attack1: {src:'../assets/sprites/Knight3/Attack_1.png', frames:5},
-      attack2: {src:'../assets/sprites/Knight3/Attack_2.png', frames:4},
-      attack3: {src:'../assets/sprites/Knight3/Attack_3.png', frames:4},
-      hurt:    {src:'../assets/sprites/Knight3/Hurt.png',     frames:2},
-      dead:    {src:'../assets/sprites/Knight3/Dead.png',     frames:6},
+    vampiregirl: {
+      idle:    {src:'../assets/assets/sprites/Vampire_Girl/Idle.png',     frames:5},
+      walk:    {src:'../assets/assets/sprites/Vampire_Girl/Walk.png',     frames:6},
+      jump:    {src:'../assets/assets/sprites/Vampire_Girl/Jump.png',     frames:6},
+      // no dedicated block/shield sheet for this character either —
+      // same Idle-reuse fallback as Countess above.
+      shield:  {src:'../assets/assets/sprites/Vampire_Girl/Idle.png',     frames:5},
+      attack1: {src:'../assets/assets/sprites/Vampire_Girl/Attack_1.png', frames:5},
+      attack2: {src:'../assets/assets/sprites/Vampire_Girl/Attack_2.png', frames:4},
+      attack3: {src:'../assets/assets/sprites/Vampire_Girl/Attack_4.png', frames:5},
+      hurt:    {src:'../assets/assets/sprites/Vampire_Girl/Hurt.png',     frames:2},
+      dead:    {src:'../assets/assets/sprites/Vampire_Girl/Dead.png',     frames:10},
     }
   };
   // display labels shown on the HUD / VS screen for each roster character
   const CHAR_META = {
-    shinobi: {label:'SHINOBI'},
-    samurai: {label:'SAMURAI'},
-    fighter: {label:'BRAWLER'},
-    knight1: {label:'KNIGHT I'},
-    knight2: {label:'KNIGHT II'},
-    knight3: {label:'KNIGHT III'}
+    shinobi:     {label:'SHINOBI'},
+    samurai:     {label:'SAMURAI'},
+    fighter:     {label:'BRAWLER'},
+    vampire:     {label:'VAMPIRE'},
+    countess:    {label:'COUNTESS'},
+    vampiregirl: {label:'VAMPIRE GIRL'}
   };
 
   // character choice comes from character-select.html via URL params
-  // (?p1=shinobi&p2=samurai) — falls back to defaults if missing/invalid,
-  // so this file still works fine if opened directly.
+  // (?p1=shinobi&p2=samurai). If the URL params are missing (e.g. this page
+  // was bookmarked/reloaded directly), we fall back to the last selection
+  // saved in localStorage by either screen, and only then to the hardcoded
+  // defaults — so a stray reload never silently resets your pick.
+  const STORE_KEY = 'neonArenaSelection';
+  function loadStoredSelection(){
+    try{
+      const raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      if(CHAR_SHEETS[parsed.p1] && CHAR_SHEETS[parsed.p2]) return parsed;
+    }catch(e){ /* localStorage unavailable or bad data — ignore */ }
+    return null;
+  }
+  function saveSelection(p1,p2){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify({p1:p1, p2:p2})); }catch(e){}
+  }
+
   const urlParams = new URLSearchParams(location.search);
-  const P1_CHAR = CHAR_SHEETS[urlParams.get('p1')] ? urlParams.get('p1') : 'shinobi';
-  const P2_CHAR = CHAR_SHEETS[urlParams.get('p2')] ? urlParams.get('p2') : 'samurai';
+  const storedSelection = loadStoredSelection();
+  const P1_CHAR = CHAR_SHEETS[urlParams.get('p1')] ? urlParams.get('p1')
+                  : (storedSelection ? storedSelection.p1 : 'shinobi');
+  const P2_CHAR = CHAR_SHEETS[urlParams.get('p2')] ? urlParams.get('p2')
+                  : (storedSelection ? storedSelection.p2 : 'samurai');
+  // keep localStorage in sync with whatever ended up being used, so the
+  // "SELECT CHARACTERS" round-trip and any direct reload stay consistent.
+  saveSelection(P1_CHAR, P2_CHAR);
 
   const STATE_TO_ANIM = {
     idle:'idle', walk:'walk', jump:'jump', block:'shield',

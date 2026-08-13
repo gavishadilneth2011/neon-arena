@@ -88,21 +88,46 @@
   "use strict";
 
   // only need the idle strip for portraits here
+  //
+  // Knight1 / Knight2 / Knight3 removed and replaced with the three
+  // vampire-pack characters (same keys used in index2.html's CHAR_SHEETS,
+  // so selection carries straight through with no extra mapping step).
   const ROSTER = {
-    shinobi: {label:'SHINOBI',    src:'../assets/sprites/Shinobi/Idle.png', frames:6},
-    samurai: {label:'SAMURAI',    src:'../assets/sprites/Samurai/Idle.png', frames:6},
-    fighter: {label:'BRAWLER',    src:'../assets/sprites/Fighter/Idle.png', frames:6},
-    knight1: {label:'KNIGHT I',   src:'../assets/sprites/Knight1/Idle.png', frames:4},
-    knight2: {label:'KNIGHT II',  src:'../assets/sprites/Knight2/Idle.png', frames:4},
-    knight3: {label:'KNIGHT III', src:'../assets/sprites/Knight3/Idle.png', frames:4}
+    shinobi:     {label:'SHINOBI',      src:'../assets/sprites/Shinobi/Idle.png',           frames:6},
+    samurai:     {label:'SAMURAI',      src:'../assets/sprites/Samurai/Idle.png',           frames:6},
+    fighter:     {label:'BRAWLER',      src:'../assets/sprites/Fighter/Idle.png',           frames:6},
+    vampire:     {label:'VAMPIRE',      src:'../assets/assets/sprites/Converted_Vampire/Idle.png', frames:5},
+    countess:    {label:'COUNTESS',     src:'../assets/assets/sprites/Countess_Vampire/Idle.png',  frames:5},
+    vampiregirl: {label:'VAMPIRE GIRL', src:'../assets/assets/sprites/Vampire_Girl/Idle.png',       frames:5}
   };
   const KEYS = Object.keys(ROSTER);
 
+  // Selection is passed forward via URL params (?p1=...&p2=...), same as
+  // before. It's now also mirrored into localStorage under this key, so
+  // that if you land here fresh (no URL params — e.g. typed the URL by
+  // hand, or a bookmark) the screen still remembers the last pair you
+  // picked instead of always resetting to shinobi/samurai.
+  const STORE_KEY = 'neonArenaSelection';
+  function loadStoredSelection(){
+    try{
+      const raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      if(ROSTER[parsed.p1] && ROSTER[parsed.p2]) return parsed;
+    }catch(e){ /* localStorage unavailable or bad data — ignore */ }
+    return null;
+  }
+  function saveSelection(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(picked)); }catch(e){}
+  }
+
   const urlParams = new URLSearchParams(location.search);
+  const storedSelection = loadStoredSelection();
   let picked = {
-    p1: ROSTER[urlParams.get('p1')] ? urlParams.get('p1') : 'shinobi',
-    p2: ROSTER[urlParams.get('p2')] ? urlParams.get('p2') : 'samurai'
+    p1: ROSTER[urlParams.get('p1')] ? urlParams.get('p1') : (storedSelection ? storedSelection.p1 : 'shinobi'),
+    p2: ROSTER[urlParams.get('p2')] ? urlParams.get('p2') : (storedSelection ? storedSelection.p2 : 'samurai')
   };
+  saveSelection();
 
   function paintPortrait(el, key){
     const c = ROSTER[key];
@@ -131,6 +156,7 @@
       card.addEventListener('click', ()=>{
         picked[side] = key;
         [...container.children].forEach(c=>c.classList.toggle('selected', c.dataset.key===key));
+        saveSelection();
       });
       container.appendChild(card);
     });
@@ -140,8 +166,9 @@
   buildColumn('p2cards','p2');
 
   document.getElementById('goBtn').addEventListener('click', ()=>{
+    saveSelection();
     const params = new URLSearchParams({ p1: picked.p1, p2: picked.p2 });
-    location.href = 'neon-arena.html?'+params.toString();
+    location.href = './index2.html?'+params.toString();
   });
 })();
 </script>
