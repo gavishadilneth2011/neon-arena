@@ -237,10 +237,23 @@
     transition:width .18s ease;
   }
   .hud-right{text-align:right;display:flex;flex-direction:column;gap:4px;}
-  .wave-label{font-size:15px;letter-spacing:3px;color:var(--neon-pink);text-shadow:0 0 8px var(--neon-pink);}
+  .level-label{font-size:15px;letter-spacing:3px;color:var(--neon-pink);text-shadow:0 0 8px var(--neon-pink);}
+  .objective-label{font-size:10px;letter-spacing:1.5px;color:#bde;text-transform:uppercase;}
   .score-label{font-size:12px;letter-spacing:2px;color:var(--neon-blue);text-shadow:0 0 6px var(--neon-blue);}
   .diff-tag{font-size:10px;letter-spacing:2px;color:#8fa; opacity:0.75;}
 
+
+  .level-grid{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:12px;width:min(620px,92vw);}
+  .level-card{position:relative;padding:18px 12px;border:1px solid rgba(57,255,136,.45);background:rgba(8,14,25,.72);
+    color:#dff;cursor:pointer;text-align:left;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;}
+  .level-card:hover:not(.locked){transform:translateY(-3px);border-color:var(--neon-green);box-shadow:0 0 20px rgba(57,255,136,.2);}
+  .level-card.locked{opacity:.38;cursor:not-allowed;filter:grayscale(.35);}
+  .level-number{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2px;color:var(--neon-blue);}
+  .level-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:15px;letter-spacing:1px;margin-top:7px;color:#fff;}
+  .level-objective{font-size:10px;line-height:1.4;color:#9ab;margin-top:7px;}
+  .level-status{font-size:9px;letter-spacing:1.5px;color:var(--neon-green);margin-top:10px;}
+  .level-card.locked .level-status{color:#889;}
+  @media(max-width:620px){.level-grid{grid-template-columns:repeat(2,minmax(120px,1fr));}.level-name{font-size:13px;}}
   .center-banner{
     position:absolute;top:38%;left:50%;transform:translate(-50%,-50%) scale(0.8);
     font-family:'Orbitron',sans-serif;font-weight:900;font-size:38px;letter-spacing:6px;
@@ -281,7 +294,7 @@
       <div class="game-card" id="cardZombie">
         <div class="card-icon" style="color:var(--neon-green)">🧟</div>
         <div class="card-title">ZOMBIE SURVIVAL</div>
-        <div class="card-desc">SURVIVE THE HORDE</div>
+        <div class="card-desc">5-LEVEL CAMPAIGN</div>
         <button class="btn" style="border-color:var(--neon-green);color:var(--neon-green);text-shadow:0 0 8px var(--neon-green);">PLAY</button>
       </div>
       <div class="game-card" id="cardFighting">
@@ -304,9 +317,19 @@
     <div class="menu-panel">
       <div class="menu-title">NEON ZOMBIE SURVIVAL</div>
       <button class="btn" id="btnPlay" style="border-color:var(--neon-green);color:var(--neon-green);text-shadow:0 0 8px var(--neon-green);">▶ PLAY</button>
+      <button class="btn purple" id="btnLevels">▦ LEVEL SELECT</button>
       <button class="btn purple" id="btnDifficulty">⚙ DIFFICULTY</button>
       <button class="btn" id="btnHowTo">❓ HOW TO PLAY</button>
       <button class="btn danger" id="btnBackHub1">◀ BACK TO GAME HUB</button>
+    </div>
+  </div>
+
+  <!-- LEVEL SELECT -->
+  <div class="screen" id="levelSelectScreen">
+    <div class="menu-panel" style="max-width:680px;">
+      <div class="menu-title" style="color:var(--neon-green);text-shadow:0 0 10px var(--neon-green);">SELECT LEVEL</div>
+      <div class="level-grid" id="levelGrid"></div>
+      <button class="btn danger" id="btnBackFromLevels" style="margin-top:14px;">◀ BACK</button>
     </div>
   </div>
 
@@ -332,8 +355,8 @@
         <b>Mouse</b> — aim<br><br>
         <b>Click / Hold Left Mouse</b> — shoot<br><br>
         Zombies spawn from the edges of the arena and hunt you down.
-        Survive each wave, watch your <b>health bar</b>, and clear waves
-        to face tougher — and eventually <b>bigger</b> — threats.<br><br>
+        Complete each <b>level objective</b> to unlock the next level.
+        Each level introduces tougher enemies and challenges, ending with a <b>boss</b>.<br><br>
         Reach <b>0 HP</b> and it's <span style="color:var(--neon-red);">GAME OVER</span>.
       </div>
       <button class="btn danger" id="btnBackFromHowto" style="margin-top:10px;">◀ BACK</button>
@@ -350,7 +373,8 @@
           <div class="health-bar-bg"><div class="health-bar-fill" id="hpFill"></div></div>
         </div>
         <div class="hud-right">
-          <div class="wave-label">WAVE: <span id="waveText">1</span></div>
+          <div class="level-label">LEVEL: <span id="levelText">1</span></div>
+          <div class="objective-label">OBJECTIVE: <span id="objectiveText">0 / 10</span></div>
           <div class="score-label">SCORE: <span id="scoreText">0</span></div>
           <div class="diff-tag" id="diffTag">MEDIUM</div>
         </div>
@@ -358,11 +382,20 @@
       <div class="center-banner" id="centerBanner"></div>
       <div id="gameOverOverlay">
         <div class="go-title">GAME OVER</div>
-        <div class="go-stats" id="goStats">You survived to wave 1 · Score 0</div>
+        <div class="go-stats" id="goStats">Level 1 failed · Score 0</div>
         <div class="go-btns">
           <button class="btn" id="btnRestart" style="border-color:var(--neon-green);color:var(--neon-green);">↻ RESTART</button>
           <button class="btn purple" id="btnMainMenu">☰ MAIN MENU</button>
           <button class="btn danger" id="btnGameHub">◀ GAME HUB</button>
+        </div>
+      </div>
+      <div id="levelCompleteOverlay" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(3,4,10,.88);backdrop-filter:blur(3px);z-index:20;">
+        <div class="go-title" style="color:var(--neon-green);text-shadow:0 0 16px var(--neon-green),0 0 50px rgba(57,255,136,.45);">LEVEL COMPLETE!</div>
+        <div class="go-stats" id="levelCompleteStats">Level 1 cleared · Score 0</div>
+        <div class="go-btns">
+          <button class="btn" id="btnNextLevel" style="border-color:var(--neon-green);color:var(--neon-green);">▶ NEXT LEVEL</button>
+          <button class="btn purple" id="btnReplayLevel">↻ REPLAY</button>
+          <button class="btn danger" id="btnLevelSelectFromComplete">▦ LEVEL SELECT</button>
         </div>
       </div>
     </div>
@@ -430,12 +463,18 @@ document.getElementById('btnDifficulty').addEventListener('click', ()=>showScree
 document.getElementById('btnBackFromDiff').addEventListener('click', ()=>showScreen('zombieMenuScreen'));
 document.getElementById('btnHowTo').addEventListener('click', ()=>showScreen('howtoScreen'));
 document.getElementById('btnBackFromHowto').addEventListener('click', ()=>showScreen('zombieMenuScreen'));
-document.getElementById('btnPlay').addEventListener('click', ()=>{ showScreen('gameScreen'); startGame(); });
+document.getElementById('btnPlay').addEventListener('click', ()=>{ startLevel(1); });
+document.getElementById('btnLevels').addEventListener('click', ()=>{ renderLevelSelect(); showScreen('levelSelectScreen'); });
+document.getElementById('btnBackFromLevels').addEventListener('click', ()=>showScreen('zombieMenuScreen'));
+document.getElementById('btnNextLevel').addEventListener('click', ()=>{ document.getElementById('levelCompleteOverlay').style.display='none'; startLevel(Math.min(LEVELS.length,currentLevel+1)); });
+document.getElementById('btnReplayLevel').addEventListener('click', ()=>{ document.getElementById('levelCompleteOverlay').style.display='none'; startLevel(currentLevel); });
+document.getElementById('btnLevelSelectFromComplete').addEventListener('click', ()=>{ document.getElementById('levelCompleteOverlay').style.display='none'; renderLevelSelect(); showScreen('levelSelectScreen'); });
 document.getElementById('btnRestart').addEventListener('click', ()=>{ hideGameOver(); startGame(); });
 document.getElementById('btnMainMenu').addEventListener('click', ()=>{ hideGameOver(); stopGame(); showScreen('zombieMenuScreen'); });
 document.getElementById('btnGameHub').addEventListener('click', ()=>{ hideGameOver(); stopGame(); showScreen('hubScreen'); });
 
 function hideGameOver(){ document.getElementById('gameOverOverlay').classList.remove('show'); }
+function hideLevelComplete(){ document.getElementById('levelCompleteOverlay').style.display='none'; }
 
 /* ---------- Canvas / Game state ---------- */
 const canvas = document.getElementById('gameCanvas');
@@ -464,7 +503,7 @@ const ZOMBIE_TYPES = {
 };
 
 let player, zombies, bullets, particles;
-let score, wave, waveState, spawnTimer, spawnQueueCount, spawnedThisWave, aliveRequiredKilled;
+let score, currentLevel, levelState, spawnTimer, spawnedThisLevel;
 let running = false, rafId = null, lastTime = 0;
 let bannerTimer = 0;
 
@@ -478,37 +517,85 @@ function makePlayer(){
   };
 }
 
+const LEVELS = [
+  {id:1, name:'FIRST NIGHT', objective:'DEFEAT 10 ZOMBIES', count:10, interval:0.95, speed:1.00, health:1.00, types:['walker']},
+  {id:2, name:'DARK STREETS', objective:'DEFEAT 15 ZOMBIES', count:15, interval:0.82, speed:1.08, health:1.08, types:['walker','runner']},
+  {id:3, name:'INFESTATION', objective:'DEFEAT 20 ZOMBIES', count:20, interval:0.70, speed:1.15, health:1.16, types:['walker','runner','stalker']},
+  {id:4, name:'LAST STAND', objective:'DEFEAT 26 ZOMBIES', count:26, interval:0.58, speed:1.23, health:1.26, types:['walker','runner','stalker']},
+  {id:5, name:'THE BOSS', objective:'DEFEAT THE BRUTE', count:6, interval:0.82, speed:1.30, health:1.35, types:['walker','runner'], boss:true}
+];
+const PROGRESS_KEY = 'neonZombieLevelProgress';
+
+function getProgress(){
+  try{
+    const p = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+    return {unlocked:Math.max(1,Math.min(LEVELS.length,p.unlocked||1)), completed:p.completed||[]};
+  }catch(e){ return {unlocked:1,completed:[]}; }
+}
+function saveProgress(p){ try{ localStorage.setItem(PROGRESS_KEY,JSON.stringify(p)); }catch(e){} }
+
+function renderLevelSelect(){
+  const grid = document.getElementById('levelGrid');
+  const p = getProgress();
+  grid.innerHTML = '';
+  LEVELS.forEach(l=>{
+    const unlocked = l.id <= p.unlocked;
+    const completed = p.completed.includes(l.id);
+    const card = document.createElement('button');
+    card.type='button';
+    card.className='level-card'+(unlocked?'':' locked');
+    card.innerHTML = `<div class="level-number">LEVEL ${l.id}</div>
+      <div class="level-name">${l.name}</div>
+      <div class="level-objective">${l.objective}</div>
+      <div class="level-status">${completed?'✓ COMPLETED':unlocked?'▶ READY':'🔒 LOCKED'}</div>`;
+    if(unlocked) card.addEventListener('click',()=>startLevel(l.id));
+    grid.appendChild(card);
+  });
+}
+
 function resetGameState(){
   player = makePlayer();
   zombies = [];
   bullets = [];
   particles = [];
   score = 0;
-  wave = 1;
-  waveState = 'running'; // running | complete | bossintro
+  currentLevel = 1;
+  levelState = 'running';
   spawnTimer = 0;
-  spawnedThisWave = 0;
+  spawnedThisLevel = 0;
   bannerTimer = 0;
   updateHud();
-  beginWave();
 }
 
-function waveConfig(w){
-  const diff = DIFFICULTIES[currentDifficulty];
-  const isBoss = (w % 5 === 0);
-  const baseCount = 5 + Math.floor(w*1.8);
-  const count = Math.max(3, Math.round(baseCount * diff.countMult));
-  const interval = Math.max(0.22, (1.15 - w*0.045) * diff.spawnIntervalMult);
-  return {count, interval, isBoss};
+function getLevelConfig(){
+  return LEVELS[currentLevel-1] || LEVELS[0];
 }
 
-let waveCfg;
-function beginWave(){
-  waveCfg = waveConfig(wave);
-  spawnedThisWave = 0;
+function startLevel(levelId){
+  const p = getProgress();
+  if(levelId > p.unlocked) return;
+  currentLevel = levelId;
+  resetLevelState();
+  showScreen('gameScreen');
+  running = true;
+  lastTime = performance.now();
+  if(rafId) cancelAnimationFrame(rafId);
+  showBanner(`LEVEL ${currentLevel}<span class="sub">${getLevelConfig().name}</span>`, getLevelConfig().boss?1800:1200);
+  rafId = requestAnimationFrame(loop);
+}
+
+function resetLevelState(){
+  player = makePlayer();
+  zombies = [];
+  bullets = [];
+  particles = [];
+  score = 0;
+  levelState = 'running';
   spawnTimer = 0;
-  waveState = 'running';
-  showBanner(`WAVE ${wave}` + (waveCfg.isBoss ? '<span class="sub">⚠ BRUTE INCOMING ⚠</span>' : ''), waveCfg.isBoss?1600:1200);
+  spawnedThisLevel = 0;
+  hideGameOver();
+  hideLevelComplete();
+  updateHud();
 }
 
 function showBanner(html, ms){
@@ -518,43 +605,38 @@ function showBanner(html, ms){
   bannerTimer = ms/1000;
 }
 
-function pickZombieType(w, isBoss, spawnIndex){
-  if(isBoss && spawnIndex===0) return 'brute';
-  const roll = Math.random();
-  if(w>=5 && roll<0.22) return 'stalker';
-  if(w>=3 && roll<0.5) return 'runner';
-  return 'walker';
+function pickZombieType(level, isBoss, spawnIndex){
+  const cfg = getLevelConfig();
+  if(isBoss && spawnIndex===cfg.count-1) return 'brute';
+  return cfg.types[Math.floor(Math.random()*cfg.types.length)];
 }
 
 function spawnZombie(){
-  const typeName = pickZombieType(wave, waveCfg.isBoss, spawnedThisWave);
+  const cfg = getLevelConfig();
+  const typeName = pickZombieType(currentLevel, !!cfg.boss, spawnedThisLevel);
   const t = ZOMBIE_TYPES[typeName];
   const diff = DIFFICULTIES[currentDifficulty];
-  // spawn at random point on edge, away from player
   let x,y;
   const edge = Math.floor(Math.random()*4);
-  if(edge===0){ x = -30; y = Math.random()*ARENA_H; }
-  else if(edge===1){ x = ARENA_W+30; y = Math.random()*ARENA_H; }
-  else if(edge===2){ x = Math.random()*ARENA_W; y = -30; }
-  else { x = Math.random()*ARENA_W; y = ARENA_H+30; }
+  if(edge===0){ x=-30; y=Math.random()*ARENA_H; }
+  else if(edge===1){ x=ARENA_W+30; y=Math.random()*ARENA_H; }
+  else if(edge===2){ x=Math.random()*ARENA_W; y=-30; }
+  else { x=Math.random()*ARENA_W; y=ARENA_H+30; }
 
-  const hpMult = waveCfg.isBoss && typeName==='brute' ? 1 : (1 + (wave-1)*0.045);
+  const isBoss = cfg.boss && typeName==='brute';
+  const hpMult = (isBoss ? 2.0 : cfg.health);
   zombies.push({
-    type: typeName, key: t.key,
-    x, y, r: 20*t.scale,
-    speed: t.speed * diff.speedMult,
-    hp: t.health * diff.healthMult * hpMult,
-    maxHp: t.health * diff.healthMult * hpMult,
-    damage: t.damage,
-    points: t.points,
-    scale: t.scale,
-    attackRange: t.attackRange,
-    attackCd: t.attackCd,
-    attackTimer: Math.random()*0.4,
-    facing: 1, anim:'walk', frame: Math.random()*4|0, frameTimer:0,
-    state:'alive', deadTimer:0, hurtFlash:0,
+    type:typeName, key:t.key, x, y, r:20*t.scale,
+    speed:t.speed*diff.speedMult*cfg.speed,
+    hp:t.health*diff.healthMult*hpMult,
+    maxHp:t.health*diff.healthMult*hpMult,
+    damage:t.damage, points:isBoss?500:t.points,
+    scale:t.scale, attackRange:t.attackRange, attackCd:t.attackCd,
+    attackTimer:Math.random()*0.4, facing:1, anim:'walk',
+    frame:Math.random()*4|0, frameTimer:0, state:'alive',
+    deadTimer:0, hurtFlash:0,
   });
-  spawnedThisWave++;
+  spawnedThisLevel++;
 }
 
 /* ---------- Update ---------- */
@@ -718,25 +800,42 @@ function updateParticles(dt){
 let screenShake = 0;
 
 function updateSpawning(dt){
-  if(waveState!=='running') return;
+  if(levelState!=='running') return;
+  const cfg = getLevelConfig();
   spawnTimer -= dt;
-  if(spawnTimer<=0 && spawnedThisWave < waveCfg.count){
+  if(spawnTimer<=0 && spawnedThisLevel < cfg.count){
     spawnZombie();
-    spawnTimer = waveCfg.interval;
+    spawnTimer = Math.max(0.28,cfg.interval * DIFFICULTIES[currentDifficulty].spawnIntervalMult);
   }
-  const allSpawned = spawnedThisWave >= waveCfg.count;
-  const allDead = zombies.every(z=>z.state==='dead' || z.deadTimer!==undefined && z.state==='dead');
+
+  const allSpawned = spawnedThisLevel >= cfg.count;
   const aliveCount = zombies.filter(z=>z.state!=='dead').length;
   if(allSpawned && aliveCount===0){
-    waveState = 'complete';
-    showBanner('WAVE COMPLETE', 1100);
-    setTimeout(()=>{
-      if(!running) return;
-      wave++;
-      updateHud();
-      beginWave();
-    }, 1100);
+    completeLevel();
   }
+}
+
+function completeLevel(){
+  if(levelState!=='running') return;
+  levelState='complete';
+  showBanner(currentLevel===5 ? 'BOSS DEFEATED!' : 'LEVEL COMPLETE!', 1000);
+
+  const p=getProgress();
+  if(!p.completed.includes(currentLevel)) p.completed.push(currentLevel);
+  p.unlocked=Math.max(p.unlocked,Math.min(LEVELS.length,currentLevel+1));
+  saveProgress(p);
+  renderLevelSelect();
+
+  setTimeout(()=>{
+    if(!running) return;
+    running=false;
+    if(rafId) cancelAnimationFrame(rafId);
+    const next=currentLevel<LEVELS.length ? `LEVEL ${currentLevel+1} UNLOCKED` : 'CAMPAIGN COMPLETE';
+    document.getElementById('levelCompleteStats').textContent =
+      `${getLevelConfig().name} cleared · Score ${score} · ${next}`;
+    document.getElementById('btnNextLevel').style.display = currentLevel<LEVELS.length ? '' : 'none';
+    document.getElementById('levelCompleteOverlay').style.display='flex';
+  },1100);
 }
 
 function updateHud(){
@@ -746,7 +845,10 @@ function updateHud(){
   if(player.hp/player.maxHp < 0.3){ fill.style.background='linear-gradient(90deg,#ff2e4d,#ff6b6b)'; fill.style.boxShadow='0 0 12px #ff2e4d'; }
   else if(player.hp/player.maxHp < 0.6){ fill.style.background='linear-gradient(90deg,#ffb300,#ffd54f)'; fill.style.boxShadow='0 0 12px #ffb300'; }
   else { fill.style.background='linear-gradient(90deg,#0f8,#39ff88)'; fill.style.boxShadow='0 0 12px #39ff88'; }
-  document.getElementById('waveText').textContent = wave;
+  document.getElementById('levelText').textContent = currentLevel;
+  const cfg=getLevelConfig();
+  document.getElementById('objectiveText').textContent =
+    cfg.boss ? 'DEFEAT THE BRUTE' : `${zombies.filter(z=>z.state==='dead').length} / ${cfg.count}`;
   document.getElementById('scoreText').textContent = score;
   document.getElementById('diffTag').textContent = currentDifficulty;
 }
@@ -854,6 +956,7 @@ function loop(t){
   updateBullets(dt);
   updateParticles(dt);
   updateSpawning(dt);
+  updateHud();
 
   if(bannerTimer>0){
     bannerTimer -= dt;
@@ -865,11 +968,7 @@ function loop(t){
 }
 
 function startGame(){
-  resetGameState();
-  running = true;
-  lastTime = performance.now();
-  if(rafId) cancelAnimationFrame(rafId);
-  rafId = requestAnimationFrame(loop);
+  startLevel(currentLevel || 1);
 }
 function stopGame(){
   running = false;
@@ -877,7 +976,7 @@ function stopGame(){
 }
 function triggerGameOver(){
   running = false;
-  document.getElementById('goStats').textContent = `You survived to wave ${wave} · Score ${score}`;
+  document.getElementById('goStats').textContent = `Level ${currentLevel} failed · Score ${score}`;
   document.getElementById('gameOverOverlay').classList.add('show');
 }
 
